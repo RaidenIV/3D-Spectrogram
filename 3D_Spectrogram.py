@@ -34,15 +34,15 @@ class Visualizer(object):
         # Initializes the QtGui
         self.app = QtGui.QApplication(sys.argv)
         self.w = gl.GLViewWidget()
-        self.w.setGeometry(0, 0, 1920, 1080)
+        self.w.setGeometry(0, 0, 1920, 1080) # Set to "portrait"
         self.w.setWindowTitle('Music Visualizer')
         self.Vector = QtGui.QVector3D
         self.w.setCameraPosition(pos=None , distance=900, azimuth=270, elevation=50)
         self.w.show()
 
         # Primary feature extraction from the audio
-        self.time_series, self.sample_rate = librosa.load("C:/Users/RAIDEN LABS/Documents/PYTHON PROJECTS/Python Assets/Test Audio SFX/mir3a_vis.wav")
-        self.hop_length = 64 # Fidelity
+        self.time_series, self.sample_rate = librosa.load("file_path")
+        self.hop_length = 64 # Fidelity (# of "lines")
         self.stft = np.abs(librosa.stft(self.time_series, hop_length=self.hop_length, n_fft=2048))
         self.oenv = librosa.onset.onset_strength(y=self.time_series, sr=self.sample_rate,
                                                  hop_length=self.hop_length)
@@ -55,7 +55,7 @@ class Visualizer(object):
 
         # Extracting and Manipulating features for visualization
         self.tempo_mult = 20
-        self.spectr_mult = 120 # Originally "60"
+        self.spectr_mult = 120 # Originally "60" (Controls height of amplitude)
         self.chroma_tracer_offset_height = self.tempo_mult + self.spectr_mult * 1.8
         self.tempo_final = self.get_tempogram()
         self.spectrogram_final = self.get_spectrogram()
@@ -70,12 +70,12 @@ class Visualizer(object):
         self.matrix_offset = 1
 
         # Extending the data to make the initial representation of the first timestamp seem continuous
-        '''self.tempo_final = self.data_extender(self.tempo_final)
+        self.tempo_final = self.data_extender(self.tempo_final)
         self.chroma = self.data_extender(self.chroma)
         self.spectro_beat_final = self.data_extender(self.spectro_beat_final)
         self.beat_boolean = self.data_extender(self.beat_boolean)
         self.camera_x = self.data_extender(self.camera_x)
-        self.chroma_tracer_z = self.data_extender(self.chroma_tracer_z)'''
+        self.chroma_tracer_z = self.data_extender(self.chroma_tracer_z)
         
 
         # Initializing the relevant data generators
@@ -96,7 +96,7 @@ class Visualizer(object):
 
         # Sets the folder to store the frames
         self.total_frames = self.tempo_final.shape[1]
-        self.img_path = os.path.abspath('C:/Users/RAIDEN LABS/Documents/PYTHON PROJECTS/#PORTFOLIO#/REF/Vis8/img_dir5')
+        self.img_path = os.path.abspath('file_path')
         os.makedirs(self.img_path, exist_ok=True)
 
         # Initializing Dictionaries to store the graph items
@@ -147,20 +147,20 @@ class Visualizer(object):
             pts = new_specto_beat_sample[start_pt:start_pt + self.spectro_beat_chunks]
             start_pt += self.spectro_beat_chunks
             self.spectro_beat_tracers[i].setData(pos=pts,
-                                                 color=(pg.mkColor(255, 255, 255, 50)),
+                                                 color=(pg.mkColor(255, 0, 0, 50)),
                                                  antialias=True,
                                                  width=1)
         # Updating the Camera
         new_cam_x_sample = next(self.cam_x_gen)
                                                
-        self.w.grabFramebuffer().save(os.path.join(self.img_path, f'img_{tracker_id}.png'))
+        #self.w.grabFramebuffer().save(os.path.join(self.img_path, f'img_{tracker_id}.png'))
     
     def animation(self):
         timer = QtCore.QTimer()
         timer.timeout.connect(self.update)
         timer.start(5)
         self.start()
-    '''
+    
     def data_extender(self, data):
         """
         This helps in adding additional data at the very beginning to ensure that the first frame isn't blank
@@ -177,7 +177,7 @@ class Visualizer(object):
             return np.hstack((np.ones(self.window_length - 1) * data[0], data))
         else:
             raise ValueError("Can't handle data with more than 2 dimensions")
-            '''
+            
 
     def data_sample_gen(self, data, offset, op_data_as_cood=True, along_y=False, ip_data_1d=False):
         """
@@ -307,6 +307,6 @@ class Visualizer(object):
 
 
 if __name__ == "__main__":
-    audio_path = "C:/Users/RAIDEN LABS/Documents/PYTHON PROJECTS/Python Assets/Test Audio SFX/mir3a_vis.wav"
+    audio_path = "file_path"
     t = Visualizer(audio_path)
     t.animation()
